@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 1.0.0 (2025-09-03)
+
+### ⚠ BREAKING CHANGES
+
+* initial release (#1) (#2)
+
+### Features
+
+* initial release ([#1](https://github.com/wp-spaghetti/wp-vite/issues/1)) ([#2](https://github.com/wp-spaghetti/wp-vite/issues/2)) ([e0887ab](https://github.com/wp-spaghetti/wp-vite/commit/e0887abe96955339ebad1cec9e8f9bd90d8375ef))
+
 ## [Unreleased]
 
 ### Added
