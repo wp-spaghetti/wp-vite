@@ -1,0 +1,85 @@
+{
+    "name": "wp-spaghetti/wp-vite",
+    "description": "A powerful Vite integration service for WordPress with Docker support, obfuscated assets handling, cache busting, and comprehensive logging",
+    "license": "GPL-3.0-or-later",
+    "type": "library",
+    "keywords": [
+        "wordpress",
+        "vite",
+        "assets",
+        "hmr",
+        "docker",
+        "obfuscation",
+        "cache-busting"
+    ],
+    "authors": [
+        {
+            "name": "Frugan",
+            "email": "dev@frugan.it",
+            "homepage": "https://github.com/frugan-dev",
+            "role": "Developer"
+        }
+    ],
+    "homepage": "https://github.com/wp-spaghetti/wp-vite",
+    "support": {
+        "issues": "https://github.com/wp-spaghetti/wp-vite/issues",
+        "source": "https://github.com/wp-spaghetti/wp-vite",
+        "docs": "https://github.com/wp-spaghetti/wp-vite#readme"
+    },
+    "require": {
+        "php": ">=8.0",
+        "wp-spaghetti/wp-env": "^2.0",
+        "wp-spaghetti/wp-logger": "^2.0"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.86",
+        "php-parallel-lint/php-parallel-lint": "^1.4",
+        "phpro/grumphp-shim": "^2.0",
+        "phpstan/phpstan": "^1.12|^2.1",
+        "phpunit/phpunit": "^9.0|^10.0|^11.0|^12.0",
+        "povils/phpmnd": "^3.6",
+        "rector/rector": "^1.2|^2.1",
+        "roave/security-advisories": "dev-latest",
+        "squizlabs/php_codesniffer": "^3.13",
+        "vimeo/psalm": "^5.26|^6.13"
+    },
+    "suggest": {
+        "inpsyde/wonolog": "For advanced WordPress logging with PSR-3 compatibility and Monolog integration"
+    },
+    "autoload": {
+        "psr-4": {
+            "WpSpaghetti\\WpVite\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "WpSpaghetti\\WpVite\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "ergebnis/composer-normalize": true,
+            "phpro/grumphp-shim": true
+        },
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "scripts": {
+        "analysis": "grumphp run --tasks=phpstan",
+        "check": "grumphp run",
+        "ci": "grumphp run --no-interaction",
+        "lint": "grumphp run --tasks=phpcsfixer,phplint,phpstan,rector",
+        "quality": "grumphp run --tasks=phpmnd,phpparser",
+        "security": "grumphp run --tasks=securitychecker_roave",
+        "test": "grumphp run --tasks=phpunit",
+        "test-coverage": "vendor/bin/phpunit --coverage-clover=coverage.xml",
+        "test-integration": "vendor/bin/phpunit --testsuite=integration",
+        "test-unit": "vendor/bin/phpunit --testsuite=unit"
+    },
+    "funding": [
+        {
+            "type": "custom",
+            "url": "https://buymeacoff.ee/frugan"
+        }
+    ]
+}

@@ -1,0 +1,41 @@
+parameters:
+    paths:
+        - src
+        - tests
+    level: 8
+    reportUnmatchedIgnoredErrors: false
+    ignoreErrors:
+        # WordPress functions that might not exist during testing
+        - '#Function apply_filters not found\.#'
+        - '#Function do_action not found\.#'
+        - '#Function get_bloginfo not found\.#'
+        - '#Function current_user_can not found\.#'
+        - '#Function trailingslashit not found\.#'
+        - '#Function wp_enqueue_script not found\.#'
+        - '#Function wp_enqueue_style not found\.#'
+        - '#Function wp_register_style not found\.#'
+        - '#Function esc_url not found\.#'
+        - '#Function add_filter not found\.#'
+        
+        # Constants that might not be defined during testing
+        - '#Constant ABSPATH not found\.#'
+        - '#Constant WPINC not found\.#'
+        - '#Constant WP_DEBUG not found\.#'
+        - '#Constant WP_ENV not found\.#'
+        - '#Constant WP_ENVIRONMENT_TYPE not found\.#'
+        - '#Constant MULTISITE not found\.#'
+        - '#Constant WP_CLI not found\.#'
+        
+        # Global variables in tests
+        - '#Variable \$_SERVER.*might not be defined\.#'
+        
+        # wp-env and wp-logger integration - these are real dependencies now
+        # Remove previous generic suppressions as these should be available
+        
+        # Test-specific suppressions
+        - '#Call to static method PHPUnit\\Framework\\Assert::.*#'
+        - '#.*in iterable type array.*#'
+        
+        # Environment variable handling
+        - '#Function putenv not found\.#'
+        - '#Function getenv not found\.#'
