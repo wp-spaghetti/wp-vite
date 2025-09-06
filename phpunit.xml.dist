@@ -13,6 +13,7 @@
             <file>tests/ViteTest.php</file>
             <file>tests/MockFunctionsTest.php</file>
             <file>tests/EdgeCaseTest.php</file>
+            <file>tests/ComponentNameTest.php</file>
         </testsuite>
         <testsuite name="integration">
             <file>tests/IntegrationTest.php</file>
