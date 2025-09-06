@@ -59,14 +59,14 @@ final class ComponentNameTest extends TestCase
         $this->clearMockVariables();
     }
 
-    public function testComponentNameAutoDetectionFromPluginPath(): void
+    public function testComponentNameAutoDetectionFromComponentPath(): void
     {
         $pluginPath = '/var/www/html/wp-content/plugins/my-awesome-plugin/';
         $pluginUrl = 'https://example.com/wp-content/plugins/my-awesome-plugin/';
 
         Vite::init($pluginPath, $pluginUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('my-awesome-plugin', $pluginName);
     }
 
@@ -77,7 +77,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($themePath, $themeUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('my-theme', $pluginName);
     }
 
@@ -88,7 +88,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($childThemePath, $childThemeUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('parent-theme', $pluginName);
     }
 
@@ -100,7 +100,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($pluginPath, $pluginUrl, '1.0.0', $explicitName);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame($explicitName, $pluginName);
     }
 
@@ -111,7 +111,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($pluginPath, $pluginUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('my-special-plugin-name', $pluginName);
     }
 
@@ -122,7 +122,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($edgePath, $edgeUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('wp-vite', $pluginName);
     }
 
@@ -133,7 +133,7 @@ final class ComponentNameTest extends TestCase
 
         Vite::init($windowsPath, $windowsUrl);
 
-        $pluginName = Vite::getPluginName();
+        $pluginName = Vite::getComponentName();
         self::assertSame('windows-plugin', $pluginName);
     }
 
@@ -214,13 +214,13 @@ final class ComponentNameTest extends TestCase
         self::assertSame('DEBUG_TEST_PLUGIN_VITE_', $debugInfo['component_env_prefix']);
     }
 
-    public function testGetPluginNameThrowsExceptionWhenNotInitialized(): void
+    public function testGetComponentNameThrowsExceptionWhenNotInitialized(): void
     {
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('WpVite not initialized. Call WpVite::init() first.');
 
         Vite::resetForTesting();
-        Vite::getPluginName();
+        Vite::getComponentName();
     }
 
     private function recursiveRemoveDirectory(string $dir): void
