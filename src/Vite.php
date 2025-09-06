@@ -587,10 +587,15 @@ class Vite
             return self::$config;
         }
 
+        // Determine Docker-aware defaults
+        $isDockerEnv = Environment::isDocker();
+        // For Docker internal communication, use container name if we're inside Docker
+        $defaultServerHost = $isDockerEnv ? 'node' : self::DEFAULT_SERVER_HOST;
+
         self::$config = [
             // Server configuration (main Vite dev server)
             'server' => [
-                'host' => Environment::get('VITE_SERVER_HOST', self::DEFAULT_SERVER_HOST),
+                'host' => Environment::get('VITE_SERVER_HOST', $defaultServerHost),
                 'port' => Environment::getInt('VITE_SERVER_PORT', self::DEFAULT_SERVER_PORT),
                 'https' => Environment::getBool('VITE_SERVER_HTTPS'),
             ],
@@ -612,7 +617,7 @@ class Vite
 
             // Environment detection
             'env' => [
-                'is_docker' => Environment::isDocker(),
+                'is_docker' => $isDockerEnv,
                 'debug_mode' => Environment::isDebug(),
                 'dev_server_enabled' => Environment::getBool('VITE_DEV_SERVER_ENABLED', true),
                 'dev_check_timeout' => Environment::getInt('VITE_DEV_CHECK_TIMEOUT', 1),
@@ -774,14 +779,9 @@ class Vite
     {
         $config = self::getConfig();
 
-        // For Docker internal communication, use container name if we're inside Docker
-        $host = $config['env']['is_docker']
-            ? Environment::get('VITE_SERVER_HOST', 'node')
-            : $config['server']['host'];
-
         $protocol = $config['server']['https'] ? 'https' : 'http';
 
-        return \sprintf('%s://%s:%d', $protocol, $host, $config['server']['port']);
+        return \sprintf('%s://%s:%d', $protocol, $config['server']['host'], $config['server']['port']);
     }
 
     /**
