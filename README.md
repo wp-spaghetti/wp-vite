@@ -98,14 +98,57 @@ add_action('wp_head', function() {
 
 ## Configuration
 
-Wp Vite supports both WordPress-native `define()` constants and modern `.env` files for configuration through the integrated wp-env library.
+Wp Vite supports both WordPress-native `define()` constants and modern `.env` files for configuration through the integrated wp-env library. Additionally, it supports component-specific environment variables for multi-plugin/theme environments.
+
+### Component-Specific Configuration
+
+Wp Vite automatically detects your plugin or theme name and supports component-specific environment variables, allowing independent configuration for each component.
+
+#### Component Name Detection
+
+```php
+// Auto-detected from path: "my-awesome-plugin"
+Vite::init(
+    plugin_dir_path(__FILE__), // /wp-content/plugins/my-awesome-plugin/
+    plugin_dir_url(__FILE__),
+    '1.0.0'
+);
+
+// Explicit component name
+Vite::init(
+    plugin_dir_path(__FILE__),
+    plugin_dir_url(__FILE__),
+    '1.0.0',
+    'custom-component-name'  // Override auto-detection
+);
+```
+
+#### Environment Variable Priority
+
+1. **Component-specific**: `{COMPONENT_NAME}_VITE_{SETTING}` (highest priority)
+2. **Global**: `VITE_{SETTING}`
+3. **Default values**
+
+```env
+# Component-specific (for plugin "ecommerce-toolkit")
+ECOMMERCE_TOOLKIT_VITE_SERVER_PORT=3001
+ECOMMERCE_TOOLKIT_VITE_HMR_PORT=3002
+
+# Global fallback
+VITE_SERVER_PORT=3000
+VITE_HMR_PORT=3000
+```
 
 ### WordPress Constants (wp-config.php)
 ```php
-// Server configuration
+// Global server configuration
 define('VITE_SERVER_HOST', 'localhost');
 define('VITE_SERVER_PORT', 3000);
 define('VITE_SERVER_HTTPS', false);
+
+// Component-specific (for plugin "my-plugin")
+define('MY_PLUGIN_VITE_SERVER_PORT', 3001);
+define('MY_PLUGIN_VITE_OUT_DIR', 'custom-assets');
 
 // HMR configuration
 define('VITE_HMR_HOST', 'localhost');
@@ -125,10 +168,15 @@ define('VITE_REACT_REFRESH', true);
 For modern setups like Bedrock, you can use `.env` files:
 
 ```env
-# Vite dev server settings
+# Global Vite dev server settings
 VITE_SERVER_HOST=localhost
 VITE_SERVER_PORT=3000
 VITE_SERVER_HTTPS=false
+
+# Plugin-specific settings
+ADMIN_DASHBOARD_VITE_SERVER_PORT=3001
+ECOMMERCE_VITE_SERVER_PORT=3002
+ANALYTICS_VITE_SERVER_PORT=3003
 
 # HMR (Hot Module Replacement) settings
 VITE_HMR_HOST=localhost
@@ -146,7 +194,30 @@ VITE_CACHE_BUSTING_ENABLED=true
 VITE_REACT_REFRESH=true
 ```
 
-**Priority**: WordPress constants take precedence over `.env` files, making it easy to override settings per environment.
+**Priority**: WordPress constants take precedence over `.env` files, and component-specific variables take precedence over global ones.
+
+### Multi-Plugin/Theme Development
+
+For complex WordPress installations with multiple plugins/themes:
+
+```env
+# Main plugin
+MAIN_PLUGIN_VITE_SERVER_PORT=3001
+MAIN_PLUGIN_VITE_OUT_DIR=main-assets
+
+# E-commerce plugin  
+ECOMMERCE_VITE_SERVER_PORT=3002
+ECOMMERCE_VITE_OUT_DIR=shop-assets
+ECOMMERCE_VITE_REACT_REFRESH=true
+
+# Theme
+MY_THEME_VITE_SERVER_PORT=3003
+MY_THEME_VITE_OUT_DIR=theme-assets
+
+# Global fallback for other components
+VITE_SERVER_HOST=localhost
+VITE_DEV_SERVER_ENABLED=true
+```
 
 ### Docker Configuration
 For Docker environments, Wp Vite automatically detects the container and adjusts configuration:
@@ -155,13 +226,23 @@ For Docker environments, Wp Vite automatically detects the container and adjusts
 # Docker-specific settings
 VITE_SERVER_HOST=node  # Container name
 VITE_HMR_HOST=localhost  # Public-facing host
+
+# Component-specific Docker settings
+ADMIN_PLUGIN_VITE_SERVER_HOST=admin-node
+SHOP_PLUGIN_VITE_SERVER_HOST=shop-node
 ```
 
 ### Build Configuration
 ```env
 VITE_OUT_DIR=assets
 VITE_MANIFEST_FILE=.vite/manifest.json
+
+# Component-specific build settings
+MY_PLUGIN_VITE_OUT_DIR=custom-assets
+MY_PLUGIN_VITE_MANIFEST_FILE=.vite/my-plugin-manifest.json
 ```
+
+For advanced component-specific configuration, see [Component Configuration Guide](docs/component-configuration.md).
 
 ## File Structure
 
@@ -224,8 +305,38 @@ Wp Vite uses different file priority patterns for production and development:
 
 ### Core Methods
 
-#### `Vite::init(string $basePath, string $baseUrl, string $version = '1.0.0')`
+#### `Vite::init(string $basePath, string $baseUrl, string $version = '1.0.0', string $componentName = '')`
 Initialize Wp Vite with your plugin/theme paths. This also initializes the integrated logger.
+
+**Parameters:**
+- `$basePath` - Base filesystem path (plugin/theme directory)
+- `$baseUrl` - Base URL (plugin/theme directory URL)  
+- `$version` - Plugin/theme version for cache busting
+- `$componentName` - Optional component name for environment variables prefix (auto-detected if empty)
+
+```php
+// Auto-detect component name from path
+Vite::init(
+    plugin_dir_path(__FILE__),
+    plugin_dir_url(__FILE__),
+    '1.0.0'
+);
+
+// Explicit component name
+Vite::init(
+    plugin_dir_path(__FILE__),
+    plugin_dir_url(__FILE__),
+    '1.0.0',
+    'my-custom-plugin'
+);
+```
+
+#### `Vite::getPluginName(): string`
+Get the detected or explicitly set component name (plugin/theme name).
+
+```php
+$componentName = Vite::getPluginName(); // Returns: "my-plugin"
+```
 
 #### `Vite::asset(string $entry): string`
 Get the URL for any asset. Automatically switches between dev server and production URLs.
@@ -253,6 +364,33 @@ Output Vite client scripts for HMR (development only).
 #### `Vite::getDebugInfo(): array`
 Get comprehensive debug information including environment details for troubleshooting.
 
+**Returns information about:**
+- Component name and environment prefix
+- Dev server status and URLs  
+- Environment detection (Docker, debug mode, etc.)
+- Configuration values (server, HMR, build settings)
+- Manifest loading status
+
+```php
+$debugInfo = Vite::getDebugInfo();
+
+// Component information
+echo $debugInfo['component_name'];        // "my-plugin"
+echo $debugInfo['component_env_prefix'];  // "MY_PLUGIN_VITE_"
+
+// Environment detection
+var_dump($debugInfo['is_docker']);        // true/false
+var_dump($debugInfo['is_debug']);         // true/false
+var_dump($debugInfo['environment_type']); // "development", "production", etc.
+
+// Server configuration  
+echo $debugInfo['server_url'];            // "http://localhost:3000"
+echo $debugInfo['hmr_url'];              // "http://localhost:3000"
+
+// Asset information
+var_dump($debugInfo['dev_server_running']); // true/false
+var_dump($debugInfo['manifest_loaded']);    // true/false
+```
 ## Example Usage
 
 ### Plugin Integration

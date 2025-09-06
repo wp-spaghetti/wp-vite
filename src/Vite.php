@@ -36,6 +36,8 @@ class Vite
 
     private const DEFAULT_HMR_PORT = 3000;
 
+    private const MIN_PATH_PARTS_FOR_DETECTION = 2;
+
     /**
      * Source to output extension mapping.
      */
@@ -91,6 +93,11 @@ class Vite
 
     private static string $version = '1.0.0';
 
+    private static string $componentName = '';
+
+    // Performance caches
+    private static string $componentEnvPrefix = '';
+
     // Initialization flag
     private static bool $initialized = false;
 
@@ -98,9 +105,14 @@ class Vite
     private static ?Logger $logger = null;
 
     /**
-     * Initialize WpVite with base paths and configuration.
+     * Initialize WpVite with base paths, configuration and component-specific  settings.
+     *
+     * @param string $basePath      Base filesystem path (plugin/theme directory)
+     * @param string $baseUrl       Base URL (plugin/theme directory URL)
+     * @param string $version       Plugin/theme version for cache busting
+     * @param string $componentName Optional plugin/theme name for environment variables prefix (auto-detected if empty)
      */
-    public static function init(string $basePath, string $baseUrl, string $version = '1.0.0'): void
+    public static function init(string $basePath, string $baseUrl, string $version = '1.0.0', string $componentName = ''): void
     {
         if (empty($basePath) || empty($baseUrl)) {
             throw new \InvalidArgumentException('Base path and base URL cannot be empty.');
@@ -109,13 +121,29 @@ class Vite
         self::$basePath = trailingslashit($basePath);
         self::$baseUrl = trailingslashit($baseUrl);
         self::$version = $version;
+        self::$componentName = $componentName ?: self::detectComponentName($basePath);
         self::$initialized = true;
+
+        // Generate and cache component environment prefix
+        self::$componentEnvPrefix = self::generatePluginEnvPrefix(self::$componentName);
 
         // Reset only the caches, not the initialization flag
         self::$isDevServer = null;
         self::$manifest = [];
         self::$config = [];
         self::$logger = null;
+    }
+
+    /**
+     * Get component name (plugin/theme) used for environment variable prefixes.
+     */
+    public static function getPluginName(): string
+    {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
+        return self::$componentName;
     }
 
     /**
@@ -419,7 +447,7 @@ class Vite
         echo '<script type="module" src="'.esc_url($hmrUrl.'/@vite/client').'"></script>'."\n";
 
         // Optional: React Refresh (if using React)
-        if (Environment::getBool('VITE_REACT_REFRESH')) {
+        if (self::getEnvironmentValueBool('REACT_REFRESH')) {
             echo '<script type="module">
                 import RefreshRuntime from "'.esc_url($hmrUrl.'/@react-refresh').'"
                 RefreshRuntime.injectIntoGlobalHook(window)
@@ -501,6 +529,8 @@ class Vite
             'config' => $config,
             'base_path' => self::$basePath,
             'base_url' => self::$baseUrl,
+            'component_name' => self::$componentName, // Component name (plugin/theme)
+            'component_env_prefix' => self::$componentEnvPrefix, // Environment prefix cache
             'environment_type' => Environment::get('WP_ENVIRONMENT_TYPE', Environment::get('WP_ENV', 'production')),
             'is_debug' => Environment::isDebug(),
             'is_docker' => Environment::isDocker(),
@@ -535,10 +565,12 @@ class Vite
         self::$basePath = '';
         self::$baseUrl = '';
         self::$version = '1.0.0';
+        self::$componentName = '';
+        self::$componentEnvPrefix = '';
     }
 
     /**
-     * Get logger instance.
+     * Get logger instance with component-specific configuration.
      */
     private static function logger(): Logger
     {
@@ -547,7 +579,7 @@ class Vite
             $minLogLevel = Environment::isTesting() ? 'emergency' : (Environment::isDebug() ? 'debug' : 'info');
 
             self::$logger = new Logger([
-                'plugin_name' => 'wp-vite',
+                'component_name' => self::$componentName,
                 'min_log_level' => $minLogLevel,
             ]);
         }
@@ -595,37 +627,141 @@ class Vite
         self::$config = [
             // Server configuration (main Vite dev server)
             'server' => [
-                'host' => Environment::get('VITE_SERVER_HOST', $defaultServerHost),
-                'port' => Environment::getInt('VITE_SERVER_PORT', self::DEFAULT_SERVER_PORT),
-                'https' => Environment::getBool('VITE_SERVER_HTTPS'),
+                'host' => self::getEnvironmentValue('SERVER_HOST', $defaultServerHost),
+                'port' => self::getEnvironmentValueInt('SERVER_PORT', self::DEFAULT_SERVER_PORT),
+                'https' => self::getEnvironmentValueBool('SERVER_HTTPS'),
             ],
 
             // HMR configuration (Hot Module Replacement WebSocket)
             'hmr' => [
-                'protocol' => Environment::get('VITE_HMR_PROTOCOL') ?: (Environment::getBool('VITE_HMR_HTTPS') ? 'wss' : 'ws'),
-                'host' => Environment::get('VITE_HMR_HOST', self::DEFAULT_HMR_HOST),
-                'port' => Environment::getInt('VITE_HMR_PORT', Environment::getInt('VITE_SERVER_PORT', self::DEFAULT_HMR_PORT)),
-                'client_port' => Environment::getInt('VITE_HMR_CLIENT_PORT', Environment::getInt('VITE_HMR_PORT', Environment::getInt('VITE_SERVER_PORT', self::DEFAULT_HMR_PORT))),
-                'https' => Environment::getBool('VITE_HMR_HTTPS'),
+                'protocol' => self::getEnvironmentValue('HMR_PROTOCOL') ?: (self::getEnvironmentValueBool('HMR_HTTPS') ? 'wss' : 'ws'),
+                'host' => self::getEnvironmentValue('HMR_HOST', self::DEFAULT_HMR_HOST),
+                'port' => self::getEnvironmentValueInt('HMR_PORT', self::getEnvironmentValueInt('SERVER_PORT', self::DEFAULT_HMR_PORT)),
+                'client_port' => self::getEnvironmentValueInt('HMR_CLIENT_PORT', self::getEnvironmentValueInt('HMR_PORT', self::getEnvironmentValueInt('SERVER_PORT', self::DEFAULT_HMR_PORT))),
+                'https' => self::getEnvironmentValueBool('HMR_HTTPS'),
             ],
 
             // Build configuration
             'build' => [
-                'out_dir' => Environment::get('VITE_OUT_DIR', 'assets'),
-                'manifest_file' => Environment::get('VITE_MANIFEST_FILE', '.vite/manifest.json'),
+                'out_dir' => self::getEnvironmentValue('OUT_DIR', 'assets'),
+                'manifest_file' => self::getEnvironmentValue('MANIFEST_FILE', '.vite/manifest.json'),
             ],
 
             // Environment detection
             'env' => [
                 'is_docker' => $isDockerEnv,
                 'debug_mode' => Environment::isDebug(),
-                'dev_server_enabled' => Environment::getBool('VITE_DEV_SERVER_ENABLED', true),
-                'dev_check_timeout' => Environment::getInt('VITE_DEV_CHECK_TIMEOUT', 1),
-                'cache_busting_enabled' => Environment::getBool('VITE_CACHE_BUSTING_ENABLED', Environment::getBool('CACHE_BUSTING_ENABLED', false)),
+                'dev_server_enabled' => self::getEnvironmentValueBool('DEV_SERVER_ENABLED', true),
+                'dev_check_timeout' => self::getEnvironmentValueInt('DEV_CHECK_TIMEOUT', 1),
+                'cache_busting_enabled' => self::getEnvironmentValueBool('CACHE_BUSTING_ENABLED', Environment::getBool('CACHE_BUSTING_ENABLED', false)),
             ],
         ];
 
         return self::$config;
+    }
+
+    /**
+     * Get environment value with component-specific prefix priority.
+     *
+     * Priority: Plugin-specific > Global VITE_ > Default
+     */
+    private static function getEnvironmentValue(string $key, ?string $default = null): ?string
+    {
+        // Plugin-specific environment variable (highest priority)
+        $componentKey = self::$componentEnvPrefix.$key;
+        $componentValue = Environment::get($componentKey);
+        if (null !== $componentValue) {
+            return $componentValue;
+        }
+
+        // Global VITE_ environment variable
+        $globalKey = 'VITE_'.$key;
+
+        return Environment::get($globalKey, $default);
+    }
+
+    /**
+     * Get environment value as boolean with component-specific prefix priority.
+     */
+    private static function getEnvironmentValueBool(string $key, bool $default = false): bool
+    {
+        // Plugin-specific environment variable (highest priority)
+        $componentKey = self::$componentEnvPrefix.$key;
+        if (null !== Environment::get($componentKey)) {
+            return Environment::getBool($componentKey, $default);
+        }
+
+        // Global VITE_ environment variable
+        $globalKey = 'VITE_'.$key;
+
+        return Environment::getBool($globalKey, $default);
+    }
+
+    /**
+     * Get environment value as integer with component-specific prefix priority.
+     */
+    private static function getEnvironmentValueInt(string $key, int $default = 0): int
+    {
+        // Plugin-specific environment variable (highest priority)
+        $componentKey = self::$componentEnvPrefix.$key;
+        if (null !== Environment::get($componentKey)) {
+            return Environment::getInt($componentKey, $default);
+        }
+
+        // Global VITE_ environment variable
+        $globalKey = 'VITE_'.$key;
+
+        return Environment::getInt($globalKey, $default);
+    }
+
+    /**
+     * Generate and cache component-specific environment variable prefix.
+     */
+    private static function generatePluginEnvPrefix(string $componentName): string
+    {
+        $componentPrefix = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '_', $componentName) ?? $componentName);
+
+        return $componentPrefix.'_VITE_';
+    }
+
+    /**
+     * Derive component name (plugin/theme) from base path if not provided.
+     */
+    private static function detectComponentName(string $basePath): string
+    {
+        // Normalize path separators and remove trailing slash
+        $normalizedPath = rtrim(str_replace('\\', '/', $basePath), '/');
+        $pathParts = explode('/', $normalizedPath);
+
+        // Get the last directory name
+        $lastPart = end($pathParts);
+
+        // Handle edge cases
+        if (!$lastPart || 'wp-content' === $lastPart) {
+            return 'wp-vite';
+        }
+
+        // Special handling for WordPress themes and plugins
+        if (\count($pathParts) >= self::MIN_PATH_PARTS_FOR_DETECTION) {
+            $parentDir = $pathParts[\count($pathParts) - 2];
+
+            // For themes, consider parent/child theme scenarios
+            if ('themes' === $parentDir) {
+                if (str_ends_with($lastPart, '-child')) {
+                    $lastPart = preg_replace('/-child$/', '', $lastPart) ?? $lastPart;
+                }
+
+                return preg_replace('/[^a-zA-Z0-9]/', '-', $lastPart) ?? $lastPart;
+            }
+
+            // For plugins, use the plugin directory name
+            if ('plugins' === $parentDir) {
+                return preg_replace('/[^a-zA-Z0-9]/', '-', $lastPart) ?? $lastPart;
+            }
+        }
+
+        // Fallback: clean the last directory name
+        return preg_replace('/[^a-zA-Z0-9]/', '-', $lastPart) ?? $lastPart;
     }
 
     /**
