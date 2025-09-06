@@ -125,7 +125,7 @@ class Vite
         self::$initialized = true;
 
         // Generate and cache component environment prefix
-        self::$componentEnvPrefix = self::generatePluginEnvPrefix(self::$componentName);
+        self::$componentEnvPrefix = self::generateComponentEnvPrefix(self::$componentName);
 
         // Reset only the caches, not the initialization flag
         self::$isDevServer = null;
@@ -137,7 +137,7 @@ class Vite
     /**
      * Get component name (plugin/theme) used for environment variable prefixes.
      */
-    public static function getPluginName(): string
+    public static function getComponentName(): string
     {
         if (!self::$initialized) {
             throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
@@ -663,11 +663,11 @@ class Vite
     /**
      * Get environment value with component-specific prefix priority.
      *
-     * Priority: Plugin-specific > Global VITE_ > Default
+     * Priority: Component-specific > Global VITE_ > Default
      */
     private static function getEnvironmentValue(string $key, ?string $default = null): ?string
     {
-        // Plugin-specific environment variable (highest priority)
+        // Component-specific environment variable (highest priority)
         $componentKey = self::$componentEnvPrefix.$key;
         $componentValue = Environment::get($componentKey);
         if (null !== $componentValue) {
@@ -685,7 +685,7 @@ class Vite
      */
     private static function getEnvironmentValueBool(string $key, bool $default = false): bool
     {
-        // Plugin-specific environment variable (highest priority)
+        // Component-specific environment variable (highest priority)
         $componentKey = self::$componentEnvPrefix.$key;
         if (null !== Environment::get($componentKey)) {
             return Environment::getBool($componentKey, $default);
@@ -702,7 +702,7 @@ class Vite
      */
     private static function getEnvironmentValueInt(string $key, int $default = 0): int
     {
-        // Plugin-specific environment variable (highest priority)
+        // Component-specific environment variable (highest priority)
         $componentKey = self::$componentEnvPrefix.$key;
         if (null !== Environment::get($componentKey)) {
             return Environment::getInt($componentKey, $default);
@@ -717,7 +717,7 @@ class Vite
     /**
      * Generate and cache component-specific environment variable prefix.
      */
-    private static function generatePluginEnvPrefix(string $componentName): string
+    private static function generateComponentEnvPrefix(string $componentName): string
     {
         $componentPrefix = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '_', $componentName) ?? $componentName);
 
