@@ -580,7 +580,7 @@ class Vite
 
             self::$logger = new Logger([
                 'component_name' => self::$componentName,
-                'min_log_level' => $minLogLevel,
+                'min_level' => $minLogLevel,
             ]);
         }
 
