@@ -26,8 +26,8 @@ A powerful Vite integration service for WordPress with enhanced Docker support, 
 - **Subdirectory Support**: Organize assets in subdirectories with automatic detection
 - **Extension Auto-Detection**: No need to specify file extensions - Wp Vite finds the right file automatically
 - **Manifest Integration**: Full Vite manifest.json support for optimized production builds
-- **Environment Management**: Built-in support for WordPress constants and .env files via wp-env
-- **Comprehensive Logging**: PSR-3 compatible logging with wp-logger integration
+- **Environment Management**: Built-in support for WordPress constants and .env files via [WP Env](https://github.com/wp-spaghetti/wp-env)
+- **Comprehensive Logging**: PSR-3 compatible logging with [WP Logger](https://github.com/wp-spaghetti/wp-logger) integration
 - **Zero External Dependencies**: Works with or without optional logging libraries
 
 ## Installation
@@ -530,7 +530,7 @@ VITE_HMR_HOST=localhost
 
 ## Logging & Debugging
 
-Wp Vite includes comprehensive logging through the integrated wp-logger library:
+Wp Vite includes comprehensive logging through the integrated [WP Logger](https://github.com/wp-spaghetti/wp-logger) library:
 
 ### Debug Information
 ```php
@@ -546,14 +546,9 @@ $debugInfo = Vite::getDebugInfo();
 // - Asset paths and URLs
 ```
 
-### Log Levels
-The logger automatically adjusts based on your environment:
-- **Development**: Debug level logging enabled
-- **Production**: Info level logging only
-- **Custom**: Set via configuration
+### Logging Configuration
 
-### Log Files
-Logs are stored securely in your WordPress content directory with appropriate protection files for different web servers.
+For detailed information about log levels, log files, and advanced logging configuration, see the [WP Logger documentation](https://github.com/wp-spaghetti/wp-logger).
 
 ## Requirements
 
