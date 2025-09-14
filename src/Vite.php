@@ -769,17 +769,13 @@ class Vite
         if (\count($pathParts) >= self::MIN_PATH_PARTS_FOR_DETECTION) {
             $parentDir = $pathParts[\count($pathParts) - 2];
 
-            // For themes, consider parent/child theme scenarios
-            if ('themes' === $parentDir) {
-                if (str_ends_with($lastPart, '-child')) {
+            // Handle WordPress component directories
+            if (\in_array($parentDir, ['themes', 'plugins', 'mu-plugins'], true)) {
+                // Special case for child themes
+                if ('themes' === $parentDir && str_ends_with($lastPart, '-child')) {
                     $lastPart = preg_replace('/-child$/', '', $lastPart) ?? $lastPart;
                 }
 
-                return preg_replace('/[^a-zA-Z0-9]/', '-', $lastPart) ?? $lastPart;
-            }
-
-            // For plugins, use the plugin directory name
-            if ('plugins' === $parentDir) {
                 return preg_replace('/[^a-zA-Z0-9]/', '-', $lastPart) ?? $lastPart;
             }
         }
