@@ -1,13 +1,17 @@
 ![PHP Version](https://img.shields.io/packagist/php-v/wp-spaghetti/wp-vite)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wp-spaghetti/wp-vite/total)
+![Packagist Downloads](https://img.shields.io/packagist/dt/wp-spaghetti/wp-vite)
+![Packagist Stars](https://img.shields.io/packagist/stars/wp-spaghetti/wp-vite)
 ![GitHub Actions Workflow Status](https://github.com/wp-spaghetti/wp-vite/actions/workflows/main.yml/badge.svg)
 ![Coverage Status](https://img.shields.io/codecov/c/github/wp-spaghetti/wp-vite)
+![Known Vulnerabilities](https://snyk.io/test/github/wp-spaghetti/wp-vite/badge.svg)
 ![GitHub Issues](https://img.shields.io/github/issues/wp-spaghetti/wp-vite)
-![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 ![GitHub Release](https://img.shields.io/github/v/release/wp-spaghetti/wp-vite)
 ![License](https://img.shields.io/github/license/wp-spaghetti/wp-vite)
 <!--
+Qlty @see https://github.com/badges/shields/issues/11192
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/wp-spaghetti/wp-vite/total)
 ![Code Climate](https://img.shields.io/codeclimate/maintainability/wp-spaghetti/wp-vite)
+![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)
 -->
 
 # Wp Vite
@@ -27,8 +31,8 @@ A powerful Vite integration service for WordPress with enhanced Docker support, 
 - **Extension Auto-Detection**: No need to specify file extensions - Wp Vite finds the right file automatically
 - **Manifest Integration**: Full Vite manifest.json support for optimized production builds
 - **Environment Management**: Built-in support for WordPress constants and .env files via [WP Env](https://github.com/wp-spaghetti/wp-env)
-- **Comprehensive Logging**: PSR-3 compatible logging with [WP Logger](https://github.com/wp-spaghetti/wp-logger) integration
-- **Zero External Dependencies**: Works with or without optional logging libraries
+- **Comprehensive Logging system**: PSR-3 compatible logging with [WP Logger](https://github.com/wp-spaghetti/wp-logger) integration and optional [Wonolog](https://github.com/inpsyde/Wonolog) support
+- **Zero External Dependencies**: Works with or without optional logging libraries, with automatic fallback to native file-based logging
 
 ## Installation
 
@@ -557,7 +561,7 @@ For detailed information about log levels, log files, and advanced logging confi
 - Node.js and Vite for development
 - [WP Env](https://github.com/wp-spaghetti/wp-env) 2.0+ for environment management
 - [WP Logger](https://github.com/wp-spaghetti/wp-logger) 2.0+ for logging service
-- Optional: [Inpsyde Wonolog](https://github.com/inpsyde/wonolog) for advanced logging
+- Optional: [Wonolog](https://github.com/inpsyde/wonolog) for advanced logging
 
 ## Changelog
 

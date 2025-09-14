@@ -175,6 +175,10 @@ class Vite
      */
     public static function isDevServer(): bool
     {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         // In test environment, never use dev server to avoid flaky tests
         if (Environment::isTesting()) {
             self::$isDevServer = false;
@@ -260,6 +264,10 @@ class Vite
         bool $inFooter = true,
         array $attributes = []
     ): void {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         // Check if asset exists before enqueuing
         if (!self::assetExists($entry, 'js')) {
             if (Environment::isDebug()) {
@@ -325,6 +333,10 @@ class Vite
         array $deps = [],
         string $media = 'all'
     ): void {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         // Check if asset exists before enqueuing
         if (!self::assetExists($entry, 'css')) {
             if (Environment::isDebug()) {
@@ -437,6 +449,10 @@ class Vite
      */
     public static function devScripts(): void
     {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         if (!self::isDevServer()) {
             return;
         }
@@ -467,6 +483,10 @@ class Vite
      */
     public static function getManifest(): array
     {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         if (!empty(self::$manifest)) {
             return self::$manifest;
         }
@@ -574,6 +594,10 @@ class Vite
      */
     private static function logger(): Logger
     {
+        if (!self::$initialized) {
+            throw new \RuntimeException('WpVite not initialized. Call WpVite::init() first.');
+        }
+
         if (!self::$logger instanceof Logger) {
             // Use Environment class to detect testing environment
             $minLogLevel = Environment::isTesting() ? 'emergency' : (Environment::isDebug() ? 'debug' : 'info');
