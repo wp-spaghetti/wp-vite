@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.2](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.1...v1.1.2) (2025-09-14)
+
+### Bug Fixes
+
+* add initialized check to static methods ([#12](https://github.com/wp-spaghetti/wp-vite/issues/12)) ([5cd8e53](https://github.com/wp-spaghetti/wp-vite/commit/5cd8e538b724579bf2dd328a3d42ae68f67800be))
+
 ## [1.1.1](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.0...v1.1.1) (2025-09-07)
 
 ### Bug Fixes
