@@ -13,7 +13,7 @@ declare(strict_types=1);
 
 // Define WordPress constants for testing
 if (!defined('ABSPATH')) {
-    define('ABSPATH', '/tmp/');
+    define('ABSPATH', '/tmp/wordpress/');
 }
 
 if (!defined('WPINC')) {
@@ -33,7 +33,7 @@ if (!defined('WP_ENVIRONMENT_TYPE')) {
 }
 
 // Autoload Composer dependencies
-require_once __DIR__.'/../vendor/autoload.php';
+require_once dirname(__DIR__).'/vendor/autoload.php';
 
 // Mock WordPress functions for testing
 if (!function_exists('trailingslashit')) {
