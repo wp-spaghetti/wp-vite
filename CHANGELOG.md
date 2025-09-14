@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.4](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.3...v1.1.4) (2025-09-14)
+
+
+### Bug Fixes
+
+* enhance directory handling in detectComponentName method ([229dd35](https://github.com/wp-spaghetti/wp-vite/commit/229dd35f7888a44f65451a8c2a5d96d4225ec02d))
+
 ## [1.1.3](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.2...v1.1.3) (2025-09-14)
 
 
