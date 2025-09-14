@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.3](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.2...v1.1.3) (2025-09-14)
+
+
+### Performance Improvements
+
+* move archive exclusions to .gitattributes ([bd94eaa](https://github.com/wp-spaghetti/wp-vite/commit/bd94eaa8590e302f2b7e111c396ed488802e0cb7))
+
 ## [1.1.2](https://github.com/wp-spaghetti/wp-vite/compare/v1.1.1...v1.1.2) (2025-09-14)
 
 ### Bug Fixes
