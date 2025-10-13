@@ -39,7 +39,7 @@ We use [git-flow workflow](https://danielkummer.github.io/git-flow-cheatsheet/) 
 ### Installation
 ```bash
 git clone https://github.com/wp-spaghetti/wp-vite.git
-cd wp-env
+cd wp-vite
 composer install
 ```
 
